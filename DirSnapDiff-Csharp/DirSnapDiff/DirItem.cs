@@ -131,7 +131,7 @@ namespace ICrew.DirSnapDiff
                     diffs.Add(new DiffItem()
                     {
                         Name = string.Format(@"{0}\{1}", pathSoFar, file.Name),
-                        Size = file.Size,
+                        Size = -file.Size,
                         Status = DiffItemStatus.Removed,
                     });
                 }
@@ -146,7 +146,7 @@ namespace ICrew.DirSnapDiff
                     diffs.Add(new DiffItem()
                     {
                         Name = string.Format(@"{0}\{1}", pathSoFar, dir.Name),
-                        Size = dir.Size,
+                        Size = -dir.Size,
                         Status = DiffItemStatus.Removed,
                     });
                 }
