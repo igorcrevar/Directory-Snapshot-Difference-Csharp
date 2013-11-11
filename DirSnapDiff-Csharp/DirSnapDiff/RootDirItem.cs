@@ -20,19 +20,19 @@ namespace ICrew.DirSnapDiff
             Level = 0;
         }
 
-        public void Save(string path)
+        public void Save(IReaderWriter readerWriter, string path)
         {
             var serializer = new XmlSerializer(typeof(RootDirItem));
-            using (var writer = new System.IO.StreamWriter(path))
+            using (var writer = readerWriter.GetWriter(path))
             {
                 serializer.Serialize(writer, this);
             }
         }
 
-        public void Load(string path)
+        public void Load(IReaderWriter readerWriter, string path)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(RootDirItem));
-            using (var reader = new System.IO.StreamReader(path))
+            using (var reader = readerWriter.GetReader(path))
             {
                 var item = (RootDirItem)serializer.Deserialize(reader);
                 this.Name = item.Name;
@@ -42,5 +42,14 @@ namespace ICrew.DirSnapDiff
             }
         }
 
+        /// <summary>
+        /// Finds differences between two dir items
+        /// </summary>
+        /// <param name="other">DirItem instance that will be compared with this instance</param>
+        /// <returns>IEnumerbale of DiffItem represents all differences</returns>
+        public IEnumerable<DiffItem> GetDiff(RootDirItem other)
+        {
+            return GetDiff(other, this.Name);
+        }
     }
 }

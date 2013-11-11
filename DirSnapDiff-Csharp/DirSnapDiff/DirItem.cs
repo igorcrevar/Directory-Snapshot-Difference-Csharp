@@ -84,17 +84,7 @@ namespace ICrew.DirSnapDiff
             Size += fileItem.Size;
         }
 
-        /// <summary>
-        /// Finds differences between two dir items
-        /// </summary>
-        /// <param name="other">DirItem instance that will be compared with this instance</param>
-        /// <returns>IEnumerbale of DiffItem represents all differences</returns>
-        public IEnumerable<DiffItem> GetDiff(RootDirItem other)
-        {
-            return GetDiff(other, this.Name);
-        }
-
-        private IEnumerable<DiffItem> GetDiff(DirItem other, string pathSoFar)
+        protected IEnumerable<DiffItem> GetDiff(DirItem other, string pathSoFar)
         {
             List<DiffItem> diffs = new List<DiffItem>();
             // added or updated files

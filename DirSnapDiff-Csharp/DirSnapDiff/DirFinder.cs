@@ -9,25 +9,26 @@ namespace ICrew.DirSnapDiff
 {
     class DirFinder
     {
-        public DirFinder()
+        private IDirAccessAbstraction dirAccess;
+
+        public DirFinder(IDirAccessAbstraction dirAccess)
         {
+            this.dirAccess = dirAccess;
         }
 
-        public RootDirItem Find(string path)
-        {
-            var item = new RootDirItem(path);
-            Find(path, item);
-            return item;
-        }
-
-        private void Find(string path, DirItem parent)
+        /// <summary>
+        /// Reursive method to populate DIrItem with its children(files and subdirectories)
+        /// </summary>
+        /// <param name="path">path to search</param>
+        /// <param name="parent">DirItem instance. It will be populated with child files and dirs</param>
+        public void Search(string path, DirItem parent)
         {
             string[] filePaths;
             string[] dirPaths;
             try
             {
-                filePaths = Directory.GetFiles(path);
-                dirPaths = Directory.GetDirectories(path);
+                filePaths = dirAccess.GetFiles(path);
+                dirPaths = dirAccess.GetDirectories(path);
             }
             catch (Exception ex)
             {
@@ -44,32 +45,10 @@ namespace ICrew.DirSnapDiff
 
             foreach (string dirPath in dirPaths)
             {
-                var item = new DirItem(dirPath, parent.Level + 1);                
-                Find(dirPath, item);
+                var item = new DirItem(dirPath, parent.Level + 1);
+                Search(dirPath, item);
                 parent.AddDir(item);
             }
-        }
-
-        private bool CanRead(string path)
-        {
-            var accessControlList = Directory.GetAccessControl(path);
-            if (accessControlList == null)
-                return false;
-            var accessRules = accessControlList.GetAccessRules(true, true, typeof(System.Security.Principal.SecurityIdentifier));
-            if (accessRules == null)
-                return false;
-
-            foreach (FileSystemAccessRule rule in accessRules)
-            {
-                if ((FileSystemRights.ListDirectory & rule.FileSystemRights) != FileSystemRights.ListDirectory) continue;
-
-                if (rule.AccessControlType == AccessControlType.Allow)
-                    return true;
-                else if (rule.AccessControlType == AccessControlType.Deny)
-                    return false;
-            }
-
-            return true;
         }
     }
 }
