@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using ICrew.DirSnapDiff.DirFinder;
 
 namespace ICrew.DirSnapDiff
 {
@@ -23,6 +24,16 @@ namespace ICrew.DirSnapDiff
         public string CompareSnapshotFilePath { get; internal set; }
         public bool DiffSortBySize { get; internal set; }
         public string DiffSaveFilePath { get; internal set; }
+        public bool ParalelFind { get; internal set; }
+        public IDirFinder GetNewFinder(IDirAccessAbstraction dirAccess)
+        {
+            if (ParalelFind)
+            {
+                return new ParallelDirFinder(dirAccess);
+            }
+            
+            return new NormalDirFinder(dirAccess);
+        }
     }
 
     class CommandLineParser
@@ -125,6 +136,9 @@ namespace ICrew.DirSnapDiff
                     case "--sortbysize":
                         parameters.DiffSortBySize = true;
                         break;
+                    case "--parallel":
+                        parameters.ParalelFind = true;
+                        break;
                     case "-h": case "--help":
                         commandRequested = CommandRequestedEnum.Help;
                         // do not proccess anything more just show help
@@ -138,6 +152,18 @@ namespace ICrew.DirSnapDiff
             if ((commandRequested & CommandRequestedEnum.CompareSnapshots) == 0 && parameters.DiffSortBySize)
             {
                 throw new InvalidParameterExcetion("Sort by size specified but snapshot to compare doesnt");
+            }
+
+            if ((commandRequested & CommandRequestedEnum.CompareSnapshots) > 0 && string.IsNullOrEmpty(parameters.DiffSaveFilePath))
+            {
+                throw new InvalidParameterExcetion("Diff file path not specified");
+            }
+
+            short snapAndCompare = (short)CommandRequestedEnum.CompareSnapshots + (short)CommandRequestedEnum.GetSnapshot;
+            if (((short)commandRequested & snapAndCompare) == (short)CommandRequestedEnum.GetSnapshot
+                && string.IsNullOrEmpty(parameters.SnapshotSaveFilePath))
+            {
+                throw new InvalidParameterExcetion("Snapshot file path not specified");
             }
         }
 

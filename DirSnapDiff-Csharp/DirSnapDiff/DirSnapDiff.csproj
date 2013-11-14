@@ -60,7 +60,10 @@
   <ItemGroup>
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="DiffItem.cs" />
-    <Compile Include="DirFinder.cs" />
+    <Compile Include="DirFinder\DirFinderExecutor.cs" />
+    <Compile Include="DirFinder\ParallelDirFinder.cs" />
+    <Compile Include="DirFinder\IDirFinder.cs" />
+    <Compile Include="DirFinder\NormalDirFinder.cs" />
     <Compile Include="DirItem.cs" />
     <Compile Include="Commands.cs" />
     <Compile Include="Exceptions.cs" />

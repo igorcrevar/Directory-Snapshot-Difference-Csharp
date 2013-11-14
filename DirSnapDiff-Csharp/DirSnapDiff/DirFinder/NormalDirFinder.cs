@@ -2,25 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO;
-using System.Security.AccessControl;
 
-namespace ICrew.DirSnapDiff
+namespace ICrew.DirSnapDiff.DirFinder
 {
-    class DirFinder
+    // Searches directory normaly in one thread
+    class NormalDirFinder : IDirFinder
     {
         private IDirAccessAbstraction dirAccess;
 
-        public DirFinder(IDirAccessAbstraction dirAccess)
+        public NormalDirFinder(IDirAccessAbstraction dirAccess)
         {
             this.dirAccess = dirAccess;
         }
 
-        /// <summary>
-        /// Reursive method to populate DIrItem with its children(files and subdirectories)
-        /// </summary>
-        /// <param name="path">path to search</param>
-        /// <param name="parent">DirItem instance. It will be populated with child files and dirs</param>
         public void Search(string path, DirItem parent)
         {
             string[] filePaths;
@@ -37,17 +31,18 @@ namespace ICrew.DirSnapDiff
             }
 
             parent.Init(filePaths.Length, dirPaths.Length);
-            foreach (string filePath in filePaths)
+            for (int i = 0; i < filePaths.Length; ++i)
             {
-                var item = new FileItem(filePath);
+                var item = new FileItem(filePaths[i]);
                 parent.AddFile(item);
             }
 
-            foreach (string dirPath in dirPaths)
+           for (int i = 0; i < dirPaths.Length; ++i)
             {
+                var dirPath = dirPaths[i];
                 var item = new DirItem(dirPath, parent.Level + 1);
-                Search(dirPath, item);
                 parent.AddDir(item);
+                Search(dirPath, item);
             }
         }
     }

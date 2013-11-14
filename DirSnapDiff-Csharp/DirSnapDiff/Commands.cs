@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ICrew.DirSnapDiff.DirFinder;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,18 +8,18 @@ namespace ICrew.DirSnapDiff
 {
     class CommandParameters
     {
-        public CommandParameters(DirFinder dirFinder, IReaderWriter readerWritter, CommandLineParams clParams, 
-                     RootDirItem rootItem)
+        public CommandParameters(DirFinderExecutor dirFinderExecutor, IReaderWriter readerWritter, 
+                                 CommandLineParams clParams, RootDirItem rootItem)
         {
-            this.DirFinder = dirFinder;
+            this.DirFinderExecutor = dirFinderExecutor;
             this.ReaderWriter = readerWritter;
             this.CLParams = clParams;
             this.RootItem = rootItem;
         }
 
-        public DirFinder DirFinder { get; set; }
-        public IReaderWriter ReaderWriter { get; set; }
-        public CommandLineParams CLParams { get; set; }
+        public DirFinderExecutor DirFinderExecutor { get; private set; }
+        public IReaderWriter ReaderWriter { get; private set; }
+        public CommandLineParams CLParams { get; private set; }
         public RootDirItem RootItem { get; set; }
     }
 
@@ -31,10 +32,8 @@ namespace ICrew.DirSnapDiff
     {
         public void Execute(CommandParameters param)
         {
-            var dirPath = param.CLParams.SnapshotSearchDirectory;
-            var dirItem = new RootDirItem(dirPath);
-            param.DirFinder.Search(dirPath, dirItem);
-
+            var dirItem = param.DirFinderExecutor.Search(param.CLParams.SnapshotSearchDirectory);
+            
             var savePath = param.CLParams.SnapshotSaveFilePath;
             if (!string.IsNullOrWhiteSpace(savePath))
             {
@@ -58,8 +57,7 @@ namespace ICrew.DirSnapDiff
             // if new root item to compare is not passed, search dir for items in oldRootItem.Name
             if (newRootItem == null)
             {
-                newRootItem = new RootDirItem(oldRootItem.Name);
-                param.DirFinder.Search(oldRootItem.Name, newRootItem);
+                newRootItem = param.DirFinderExecutor.Search(oldRootItem.Name);
             }
 
             // find diff and save it

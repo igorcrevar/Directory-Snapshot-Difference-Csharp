@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using System.IO;
+using ICrew.DirSnapDiff.DirFinder;
 
 namespace ICrew.DirSnapDiff
 {
@@ -44,14 +45,15 @@ namespace ICrew.DirSnapDiff
         {
             Console.WriteLine(" Directory Snapshot Difference by Igor Crevar");
             Console.WriteLine();
-            Console.WriteLine(" dirsnap -c snapshot_file_path [diff_file_path] [--sortbysize] " +
-                                "[-s file_path_to_search [snapshot_file_path]]");
+            Console.WriteLine(" dirsnap -c snapshot_file_path diff_file_path [--sortbysize] " +
+                                "[-s file_path_to_search [snapshot_file_path]] [--parallel]");
             Console.WriteLine();
-            Console.WriteLine(" dirsnap -s directory_path [snapshot_file_path]");
+            Console.WriteLine(" dirsnap -s directory_path snapshot_file_path [--parallel]");
             Console.WriteLine();
             Console.WriteLine("     * snapshot_file_path = path where is old snapshot for comparing");
             Console.WriteLine("     * diff_file_path = path where difference will be saved. if not specified path to directoty is inside snapshot file(same directory will be compared)");
             Console.WriteLine("     * --sortbysize = sort by size, otherwise differences will be sorted by name");
+            Console.WriteLine("     * --parallel = use multi-thread finder instead of single thread");
             Console.WriteLine("     * directory_path = directory that will be examined");
             Console.WriteLine("     * snapshot_file_path = file where current snapshot will be saved");
             Console.WriteLine("     If -c switch is used -s can be ommited. In that case snapshot directory is read from snapshot_file_path");
@@ -60,9 +62,10 @@ namespace ICrew.DirSnapDiff
 
         private static void Execute(CommandLineParams clParams, bool isGetSnapshot, bool isCompare)
         {
-            var dirFinder = new DirFinder(new DirAccessDefault());
+            var dirFinder = clParams.GetNewFinder(new DirAccessDefault());
+            var dirFinderExecutor = new DirFinderExecutor(dirFinder);
             var readerWriter = new ReaderWriterDefault();
-            CommandParameters param = new CommandParameters(dirFinder, readerWriter, clParams, null);
+            CommandParameters param = new CommandParameters(dirFinderExecutor, readerWriter, clParams, null);
             if (isGetSnapshot)
             {
                 new GetSnashotCommand().Execute(param);
